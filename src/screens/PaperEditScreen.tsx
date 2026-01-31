@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -8,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { AtmosphericBackground } from '../components/AtmosphericBackground';
 import { ChannelSwitch } from '../components/ChannelSwitch';
 import { FieldInput } from '../components/FieldInput';
@@ -27,7 +29,7 @@ type Props = {
 
 const createSection = (index: number): PaperSection => ({
   id: `section-${Date.now()}-${index}`,
-  title: `Section ${index + 1}`,
+  title: '',
   content: '',
 });
 
@@ -51,6 +53,7 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
     return parts[1]?.trim() ?? '';
   });
   const [year, setYear] = useState(paper?.year?.toString() ?? '');
+  const [yearPickerOpen, setYearPickerOpen] = useState(false);
   const [tags, setTags] = useState<string[]>(
     paper?.tags?.length ? paper.tags : ['']
   );
@@ -148,6 +151,13 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
   const addTag = () => {
     setTags((prev) => [...prev, '']);
   };
+
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from(
+    { length: currentYear - 1900 + 1 },
+    (_, index) => `${currentYear - index}`
+  );
+  const selectedYear = year || `${currentYear}`;
 
   const handleDelete = () => {
     if (!paper?.id) {
@@ -293,12 +303,20 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
                   />
                 </View>
               </View>
-              <FieldInput
-                label="年"
-                value={year}
-                onChangeText={setYear}
-                labelStyle={styles.fieldLabel}
-              />
+              <View style={styles.yearPickerBlock}>
+                <Text style={[styles.fieldLabel, styles.yearLabel]}>年</Text>
+                <TouchableOpacity
+                  style={styles.yearField}
+                  onPress={() => {
+                    if (!year) {
+                      setYear(`${currentYear}`);
+                    }
+                    setYearPickerOpen(true);
+                  }}
+                >
+                  <Text style={styles.yearFieldText}>{selectedYear}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 
@@ -329,7 +347,7 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
             labelStyle={styles.fieldLabel}
           />
 
-          <View>
+          <View style={styles.sectionGroup}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>章データ</Text>
               <PrimaryButton label="章を追加" onPress={addSection} variant="ocean" />
@@ -342,9 +360,12 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
               <View key={section.id} style={styles.sectionCard}>
                 <FieldInput
                   label={`章タイトル ${index + 1}`}
+                  placeholder="章タイトルを入力"
                   value={section.title}
                   onChangeText={(value) => updateSection(index, { title: value })}
                   labelStyle={styles.fieldLabel}
+                  borderless
+                  placeholderTextColor={colors.placeholder}
                 />
                 <FieldInput
                   label="内容"
@@ -352,6 +373,7 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
                   onChangeText={(value) => updateSection(index, { content: value })}
                   multiline
                   labelStyle={styles.fieldLabel}
+                  borderless
                 />
                 <FieldInput
                   label="要約 (任意)"
@@ -359,6 +381,7 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
                   onChangeText={(value) => updateSection(index, { summary: value })}
                   multiline
                   labelStyle={styles.fieldLabel}
+                  borderless
                 />
               </View>
             ))}
@@ -388,6 +411,33 @@ export function PaperEditScreen({ paper, onSave, onCancel, onDelete }: Props) {
               style={styles.cancelButton}
             />
           )}
+          <Modal
+            visible={yearPickerOpen}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setYearPickerOpen(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalSheet}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>年を選択</Text>
+                  <TouchableOpacity onPress={() => setYearPickerOpen(false)}>
+                    <Text style={styles.modalDone}>閉じる</Text>
+                  </TouchableOpacity>
+                </View>
+                <Picker
+                  selectedValue={selectedYear}
+                  onValueChange={(value) => setYear(String(value))}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {yearOptions.map((value) => (
+                    <Picker.Item key={value} label={value} value={value} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          </Modal>
         </ScrollView>
       </SafeAreaView>
     </AtmosphericBackground>
@@ -417,6 +467,65 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 14,
   },
+  yearPickerBlock: {
+    marginBottom: spacing.md,
+  },
+  yearLabel: {
+    fontFamily: typography.mono,
+    color: colors.ocean,
+    marginBottom: spacing.xs,
+    fontWeight: '600',
+  },
+  yearField: {
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  yearFieldText: {
+    fontFamily: typography.body,
+    color: colors.ink,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+  },
+  modalSheet: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: spacing.md,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontFamily: typography.heading,
+    fontSize: 16,
+    color: colors.ink,
+  },
+  modalDone: {
+    fontFamily: typography.body,
+    color: colors.ocean,
+    fontWeight: '600',
+  },
+  picker: {
+    color: colors.ink,
+  },
+  pickerItem: {
+    color: colors.ink,
+    fontFamily: typography.body,
+    fontSize: 18,
+  },
   gridRow: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -440,7 +549,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.sm,
-    marginTop: spacing.md,
   },
   sectionTitle: {
     fontFamily: typography.mono,
@@ -451,6 +559,13 @@ const styles = StyleSheet.create({
   sectionHint: {
     fontFamily: typography.body,
     color: colors.inkSoft,
+    marginBottom: spacing.md,
+  },
+  sectionGroup: {
+    backgroundColor: colors.clayDeep,
+    borderRadius: 16,
+    padding: spacing.md,
+    marginTop: spacing.md,
     marginBottom: spacing.md,
   },
   modeCard: {
@@ -494,12 +609,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   sectionCard: {
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: spacing.md,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    padding: 0,
     marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   cancelButton: {
     marginTop: spacing.sm,
