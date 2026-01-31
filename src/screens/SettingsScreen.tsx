@@ -9,10 +9,11 @@ import { typography } from '../theme/typography';
 
 type Props = {
   userEmail: string;
+  userName?: string;
   onSignOut: () => void;
 };
 
-export function SettingsScreen({ userEmail, onSignOut }: Props) {
+export function SettingsScreen({ userEmail, userName, onSignOut }: Props) {
   return (
     <AtmosphericBackground>
       <SafeAreaView style={styles.container}>
@@ -20,32 +21,43 @@ export function SettingsScreen({ userEmail, onSignOut }: Props) {
           <Text style={styles.title}>Settings</Text>
           <Text style={styles.subtitle}>同期・セキュリティ・プロフィール</Text>
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>アカウント</Text>
-            <Text style={styles.cardText}>{userEmail}</Text>
-            <View style={styles.row}>
-              <TagPill label="Firebase 認証" tone="accent" />
-              <TagPill label="2FA: 未設定" tone="warning" />
-            </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>アカウント</Text>
+          <Text style={styles.cardLabel}>名前</Text>
+          <Text style={styles.cardText}>{userName || '未設定'}</Text>
+          <PrimaryButton
+            label="名前を再設定する"
+            onPress={() => undefined}
+            variant="ocean"
+            style={styles.inlineButton}
+          />
+          <Text style={styles.cardLabel}>メールアドレス</Text>
+          <Text style={styles.cardText}>{userEmail}</Text>
+          <View style={styles.row}>
+            <TagPill label="Firebase 認証" tone="accent" />
+            <TagPill label="2FA: 未設定" tone="warning" />
           </View>
+        </View>
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>同期ステータス</Text>
-            <Text style={styles.cardText}>
-              最終同期: 2026-01-30 18:20 · オフライン対応
-            </Text>
-            <PrimaryButton label="今すぐ同期" onPress={() => undefined} variant="ghost" />
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>AI 処理</Text>
-            <Text style={styles.cardText}>
-              翻訳/要約の実行履歴や API 連携を管理できます。
-            </Text>
-            <PrimaryButton label="API 設定" onPress={() => undefined} variant="ghost" />
-          </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>パスワード再設定</Text>
+          <Text style={styles.cardText}>
+            登録済みのメールアドレス宛にリセット用リンクを送信します。
+          </Text>
+          <PrimaryButton
+            label="送信する"
+            onPress={() => undefined}
+            variant="ocean"
+          />
+        </View>
 
           <PrimaryButton label="ログアウト" onPress={onSignOut} variant="dark" />
+          <PrimaryButton
+            label="アカウント削除"
+            onPress={() => undefined}
+            variant="danger"
+            style={styles.deleteButton}
+          />
         </ScrollView>
       </SafeAreaView>
     </AtmosphericBackground>
@@ -83,7 +95,16 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: typography.mono,
     color: colors.ocean,
+    fontSize: 14,
+    fontWeight: '600',
     marginBottom: spacing.sm,
+  },
+  cardLabel: {
+    fontFamily: typography.mono,
+    color: colors.ocean,
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
   },
   cardText: {
     fontFamily: typography.body,
@@ -93,5 +114,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  inlineButton: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.sm,
+  },
+  deleteButton: {
+    marginTop: spacing.sm,
   },
 });
