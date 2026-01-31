@@ -45,6 +45,7 @@ const Tabs = createBottomTabNavigator<TabsParamList>();
 export default function App() {
   const [papers, setPapers] = useState<Paper[]>(mockPapers);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
 
   const paperMap = useMemo(() => {
     return papers.reduce<Record<string, Paper>>((acc, paper) => {
@@ -72,7 +73,10 @@ export default function App() {
       <AuthStack.Screen name="SignIn">
         {({ navigation }) => (
           <SignInScreen
-            onSignIn={(email) => setUserEmail(email || 'demo@seitone.app')}
+            onSignIn={(email) => {
+              setUserEmail(email || 'demo@seitone.app');
+              setUserName('');
+            }}
             onMoveToSignUp={() => navigation.navigate('SignUp')}
           />
         )}
@@ -80,7 +84,10 @@ export default function App() {
       <AuthStack.Screen name="SignUp">
         {({ navigation }) => (
           <SignUpScreen
-            onSignUp={(email) => setUserEmail(email || 'demo@seitone.app')}
+            onSignUp={(email, name) => {
+              setUserEmail(email || 'demo@seitone.app');
+              setUserName(name);
+            }}
             onMoveToSignIn={() => navigation.navigate('SignIn')}
           />
         )}
@@ -127,6 +134,7 @@ export default function App() {
         {() => (
           <SettingsScreen
             userEmail={userEmail ?? 'demo@seitone.app'}
+            userName={userName}
             onSignOut={() => setUserEmail(null)}
           />
         )}
