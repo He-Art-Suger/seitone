@@ -1,5 +1,11 @@
-import React from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TextStyle,
+  View,
+} from 'react-native';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
@@ -11,6 +17,9 @@ type Props = {
   onChangeText: (value: string) => void;
   multiline?: boolean;
   secureTextEntry?: boolean;
+  labelStyle?: TextStyle;
+  placeholderTextColor?: string;
+  persistentPlaceholder?: boolean;
 };
 
 export function FieldInput({
@@ -20,19 +29,48 @@ export function FieldInput({
   onChangeText,
   multiline = false,
   secureTextEntry = false,
+  labelStyle,
+  placeholderTextColor,
+  persistentPlaceholder = false,
 }: Props) {
+  const [focused, setFocused] = useState(false);
+  const showPersistentPlaceholder =
+    persistentPlaceholder && !focused && !value && !!placeholder;
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={[styles.input, multiline && styles.inputMultiline]}
-        placeholder={placeholder}
-        value={value}
-        onChangeText={onChangeText}
-        multiline={multiline}
-        secureTextEntry={secureTextEntry}
-        placeholderTextColor={colors.inkSoft}
-      />
+      <Text style={[styles.label, labelStyle]}>{label}</Text>
+      <View
+        style={[
+          styles.inputWrapper,
+          persistentPlaceholder && styles.inputWrapperPersistent,
+        ]}
+      >
+        {showPersistentPlaceholder && (
+          <Text
+            style={[
+              styles.placeholder,
+              { color: placeholderTextColor ?? colors.inkSoft },
+            ]}
+          >
+            {placeholder}
+          </Text>
+        )}
+        <TextInput
+          style={[
+            styles.input,
+            persistentPlaceholder && styles.inputPersistent,
+            multiline && styles.inputMultiline,
+          ]}
+          placeholder={persistentPlaceholder ? undefined : placeholder}
+          value={value}
+          onChangeText={onChangeText}
+          multiline={multiline}
+          secureTextEntry={secureTextEntry}
+          placeholderTextColor={placeholderTextColor ?? colors.inkSoft}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+      </View>
     </View>
   );
 }
@@ -46,6 +84,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.ocean,
     marginBottom: spacing.xs,
+    fontWeight: '600',
   },
   input: {
     backgroundColor: colors.white,
@@ -57,8 +96,29 @@ const styles = StyleSheet.create({
     fontFamily: typography.body,
     color: colors.ink,
   },
+  inputPersistent: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+  },
   inputMultiline: {
     minHeight: 100,
     textAlignVertical: 'top',
+  },
+  inputWrapper: {
+    position: 'relative',
+  },
+  inputWrapperPersistent: {
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  placeholder: {
+    position: 'absolute',
+    left: spacing.md,
+    top: spacing.sm,
+    right: spacing.md,
+    fontFamily: typography.body,
+    zIndex: 1,
   },
 });

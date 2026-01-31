@@ -4,7 +4,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { enableScreens } from 'react-native-screens';
-import { Feather } from '@expo/vector-icons';
 import { mockPapers } from './src/data/mock';
 import { Paper } from './src/types';
 import { SignInScreen } from './src/screens/SignInScreen';
@@ -13,7 +12,7 @@ import { LibraryScreen } from './src/screens/LibraryScreen';
 import { PaperDetailScreen } from './src/screens/PaperDetailScreen';
 import { PaperEditScreen } from './src/screens/PaperEditScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
-import { colors } from './src/theme/colors';
+import { CustomTabBar } from './src/components/CustomTabBar';
 
 enableScreens();
 
@@ -64,6 +63,10 @@ export default function App() {
     });
   };
 
+  const deletePaper = (paperId: string) => {
+    setPapers((prev) => prev.filter((paper) => paper.id !== paperId));
+  };
+
   const AuthStackScreen = () => (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="SignIn">
@@ -89,21 +92,20 @@ export default function App() {
     <Tabs.Navigator
       screenOptions={{
         headerShown: false,
+        sceneContainerStyle: { backgroundColor: 'transparent' },
         tabBarStyle: {
-          borderTopColor: 'rgba(25, 30, 39, 0.08)',
-          backgroundColor: colors.white,
+          backgroundColor: 'transparent',
+          borderTopWidth: 0,
+          position: 'absolute',
+          elevation: 0,
         },
-        tabBarActiveTintColor: colors.ocean,
-        tabBarInactiveTintColor: colors.inkSoft,
       }}
+      tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen
         name="Library"
         options={{
           title: 'Library',
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="book-open" size={size} color={color} />
-          ),
         }}
       >
         {({ navigation }) => (
@@ -120,9 +122,6 @@ export default function App() {
         name="Settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="sliders" size={size} color={color} />
-          ),
         }}
       >
         {() => (
@@ -164,6 +163,10 @@ export default function App() {
               navigation.goBack();
             }}
             onCancel={() => navigation.goBack()}
+            onDelete={(paperId) => {
+              deletePaper(paperId);
+              navigation.popToTop();
+            }}
           />
         )}
       </MainStack.Screen>

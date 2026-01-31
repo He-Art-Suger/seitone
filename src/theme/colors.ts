@@ -16,7 +16,7 @@ export const colors = {
   accentSoft: '#F7D8C9',
   success: '#3F8E73',
   warning: '#E3A73F',
-  danger: '#D15D4E',
+  danger: '#A00000',
   border: '#E1D7C9',
   placeholder: '#9AA1A9',
 };
