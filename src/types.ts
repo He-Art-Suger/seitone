@@ -15,6 +15,9 @@ export type Paper = {
   language: PaperLanguage;
   authors: string[];
   venue?: string;
+  volume?: string;
+  issue?: string;
+  pages?: string;
   year?: number;
   tags: string[];
   status: PaperStatus;

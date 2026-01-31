@@ -7,7 +7,7 @@ import { typography } from '../theme/typography';
 type Props = {
   label: React.ReactNode;
   onPress: () => void;
-  variant?: 'primary' | 'ghost' | 'dark';
+  variant?: 'primary' | 'ghost' | 'dark' | 'outline' | 'ocean' | 'danger';
   style?: ViewStyle;
   labelStyle?: TextStyle;
 };
@@ -26,7 +26,14 @@ export function PrimaryButton({
       onPress={onPress}
     >
       {isPrimitive ? (
-        <Text style={[styles.text, variant === 'dark' && styles.textDark, labelStyle]}>
+        <Text
+          style={[
+            styles.text,
+            variant === 'dark' && styles.textDark,
+            variant === 'outline' && styles.textOutline,
+            labelStyle,
+          ]}
+        >
           {label}
         </Text>
       ) : (
@@ -55,6 +62,17 @@ const styles = StyleSheet.create({
   dark: {
     backgroundColor: colors.ink,
   },
+  ocean: {
+    backgroundColor: colors.ocean,
+  },
+  danger: {
+    backgroundColor: colors.danger,
+  },
+  outline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.ocean,
+  },
   text: {
     fontFamily: typography.body,
     color: colors.white,
@@ -62,5 +80,8 @@ const styles = StyleSheet.create({
   },
   textDark: {
     color: colors.white,
+  },
+  textOutline: {
+    color: colors.ocean,
   },
 });

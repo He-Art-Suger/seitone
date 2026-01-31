@@ -31,8 +31,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: typography.mono,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.ocean,
+    fontWeight: '600',
     marginBottom: spacing.xs,
   },
   summary: {

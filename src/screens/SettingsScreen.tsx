@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AtmosphericBackground } from '../components/AtmosphericBackground';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { TagPill } from '../components/TagPill';
@@ -15,37 +15,39 @@ type Props = {
 export function SettingsScreen({ userEmail, onSignOut }: Props) {
   return (
     <AtmosphericBackground>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>同期・セキュリティ・プロフィール</Text>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.subtitle}>同期・セキュリティ・プロフィール</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>アカウント</Text>
-          <Text style={styles.cardText}>{userEmail}</Text>
-          <View style={styles.row}>
-            <TagPill label="Firebase 認証" tone="accent" />
-            <TagPill label="2FA: 未設定" tone="warning" />
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>アカウント</Text>
+            <Text style={styles.cardText}>{userEmail}</Text>
+            <View style={styles.row}>
+              <TagPill label="Firebase 認証" tone="accent" />
+              <TagPill label="2FA: 未設定" tone="warning" />
+            </View>
           </View>
-        </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>同期ステータス</Text>
-          <Text style={styles.cardText}>
-            最終同期: 2026-01-30 18:20 · オフライン対応
-          </Text>
-          <PrimaryButton label="今すぐ同期" onPress={() => undefined} variant="ghost" />
-        </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>同期ステータス</Text>
+            <Text style={styles.cardText}>
+              最終同期: 2026-01-30 18:20 · オフライン対応
+            </Text>
+            <PrimaryButton label="今すぐ同期" onPress={() => undefined} variant="ghost" />
+          </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>AI 処理</Text>
-          <Text style={styles.cardText}>
-            翻訳/要約の実行履歴や API 連携を管理できます。
-          </Text>
-          <PrimaryButton label="API 設定" onPress={() => undefined} variant="ghost" />
-        </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>AI 処理</Text>
+            <Text style={styles.cardText}>
+              翻訳/要約の実行履歴や API 連携を管理できます。
+            </Text>
+            <PrimaryButton label="API 設定" onPress={() => undefined} variant="ghost" />
+          </View>
 
-        <PrimaryButton label="ログアウト" onPress={onSignOut} variant="dark" />
-      </ScrollView>
+          <PrimaryButton label="ログアウト" onPress={onSignOut} variant="dark" />
+        </ScrollView>
+      </SafeAreaView>
     </AtmosphericBackground>
   );
 }
@@ -55,17 +57,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
     paddingBottom: spacing.xxl,
   },
   title: {
     fontFamily: typography.heading,
-    fontSize: 24,
+    fontSize: 26,
     color: colors.ink,
   },
   subtitle: {
     fontFamily: typography.body,
     color: colors.inkSoft,
+    marginTop: 4,
     marginBottom: spacing.lg,
   },
   card: {

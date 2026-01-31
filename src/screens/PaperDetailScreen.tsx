@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AtmosphericBackground } from '../components/AtmosphericBackground';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SectionSummaryCard } from '../components/SectionSummaryCard';
@@ -53,69 +53,78 @@ export function PaperDetailScreen({ paper, onEdit, onUpdate }: Props) {
 
   return (
     <AtmosphericBackground>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{current.title}</Text>
-          <PrimaryButton label="編集" onPress={() => onEdit(current)} />
-        </View>
-        <Text style={styles.meta}>
-          {current.venue ?? '未設定'} · {current.year ?? '—'} ·{' '}
-          {current.authors.join(', ')}
-        </Text>
-        <View style={styles.tags}>
-          <TagPill label={current.language === 'ja' ? '日本語' : 'English'} tone="accent" />
-          {current.tags.map((tag) => (
-            <TagPill key={tag} label={tag} />
-          ))}
-        </View>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{current.title}</Text>
+            <PrimaryButton label="編集" onPress={() => onEdit(current)} />
+          </View>
+          <Text style={styles.meta}>
+            {current.venue ?? '未設定'} · {current.year ?? '—'} ·{' '}
+            {current.authors.join(', ')}
+          </Text>
+          <View style={styles.tags}>
+            <TagPill
+              label={current.language === 'ja' ? '日本語' : 'English'}
+              tone="accent"
+            />
+            {current.tags.map((tag) => (
+              <TagPill key={tag} label={tag} />
+            ))}
+          </View>
 
-        <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Abstract</Text>
-          <Text style={styles.sectionText}>{current.abstract}</Text>
+          <View style={styles.sectionBlock}>
+            <Text style={styles.sectionTitle}>Abstract</Text>
+            <Text style={styles.sectionText}>{current.abstract}</Text>
+            {current.language === 'en' && (
+              <View style={styles.buttonRow}>
+                <PrimaryButton label="日本語へ翻訳" onPress={handleTranslate} />
+              </View>
+            )}
+          </View>
+
           {current.language === 'en' && (
-            <View style={styles.buttonRow}>
-              <PrimaryButton label="日本語へ翻訳" onPress={handleTranslate} />
+            <View style={styles.sectionBlock}>
+              <Text style={styles.sectionTitle}>日本語訳</Text>
+              <Text style={styles.sectionText}>
+                {current.translatedAbstract ?? '翻訳はまだありません。'}
+              </Text>
             </View>
           )}
-        </View>
 
-        {current.language === 'en' && (
           <View style={styles.sectionBlock}>
-            <Text style={styles.sectionTitle}>日本語訳</Text>
+            <View style={styles.rowBetween}>
+              <Text style={styles.sectionTitle}>全体要約</Text>
+              <PrimaryButton
+                label="自動要約"
+                onPress={handleSummarize}
+                variant="ghost"
+              />
+            </View>
             <Text style={styles.sectionText}>
-              {current.translatedAbstract ?? '翻訳はまだありません。'}
+              {current.overallSummary ?? 'まだ要約がありません。'}
             </Text>
           </View>
-        )}
 
-        <View style={styles.sectionBlock}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.sectionTitle}>全体要約</Text>
-            <PrimaryButton label="自動要約" onPress={handleSummarize} variant="ghost" />
+          <View style={styles.sectionBlock}>
+            <View style={styles.rowBetween}>
+              <Text style={styles.sectionTitle}>章ごとの要約</Text>
+              <PrimaryButton
+                label="一括要約"
+                onPress={handleSummarizeSections}
+                variant="ghost"
+              />
+            </View>
+            {current.sections.map((section) => (
+              <SectionSummaryCard
+                key={section.id}
+                title={section.title}
+                summary={section.summary}
+              />
+            ))}
           </View>
-          <Text style={styles.sectionText}>
-            {current.overallSummary ?? 'まだ要約がありません。'}
-          </Text>
-        </View>
-
-        <View style={styles.sectionBlock}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.sectionTitle}>章ごとの要約</Text>
-            <PrimaryButton
-              label="一括要約"
-              onPress={handleSummarizeSections}
-              variant="ghost"
-            />
-          </View>
-          {current.sections.map((section) => (
-            <SectionSummaryCard
-              key={section.id}
-              title={section.title}
-              summary={section.summary}
-            />
-          ))}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </AtmosphericBackground>
   );
 }
@@ -125,7 +134,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
     paddingBottom: spacing.xxl,
   },
   header: {
@@ -161,8 +171,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: typography.mono,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.ocean,
+    fontWeight: '600',
     marginBottom: spacing.sm,
   },
   sectionText: {
