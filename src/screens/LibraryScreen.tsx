@@ -1,7 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
+  Animated,
+  Dimensions,
   FlatList,
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -25,48 +31,123 @@ type Props = {
 export function LibraryScreen({ papers, onSelectPaper, onCreatePaper }: Props) {
   const [channel, setChannel] = useState<PaperLanguage>('ja');
   const [query, setQuery] = useState('');
+  const [pageWidth, setPageWidth] = useState(Dimensions.get('window').width);
+  const pagerRef = useRef<ScrollView>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
 
-  const filtered = useMemo(() => {
+  const filterPapers = (lang: PaperLanguage) => {
     return papers.filter((paper) => {
-      const matchesLang = paper.language === channel;
+      const matchesLang = paper.language === lang;
       const matchesQuery =
         paper.title.toLowerCase().includes(query.toLowerCase()) ||
         paper.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
       return matchesLang && matchesQuery;
     });
-  }, [papers, channel, query]);
+  };
+
+  const filteredJa = useMemo(() => filterPapers('ja'), [papers, query]);
+  const filteredEn = useMemo(() => filterPapers('en'), [papers, query]);
+
+  const handleChannelChange = (next: PaperLanguage) => {
+    setChannel(next);
+    const xOffset = next === 'ja' ? 0 : pageWidth;
+    pagerRef.current?.scrollTo({ x: xOffset, animated: true });
+  };
+
+  const handlePagerLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+    setPageWidth(width);
+    pagerRef.current?.scrollTo({
+      x: channel === 'ja' ? 0 : width,
+      animated: false,
+    });
+  };
+
+  const handlePagerScrollEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = pageWidth ? Math.round(offsetX / pageWidth) : 0;
+    const next = index === 0 ? 'ja' : 'en';
+    if (next !== channel) {
+      setChannel(next);
+    }
+  };
 
   return (
     <AtmosphericBackground>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Paper Vault</Text>
-            <Text style={styles.subtitle}>翻訳・要約・整理のダッシュボード</Text>
-          </View>
-          <PrimaryButton label="追加" onPress={onCreatePaper} />
-        </View>
-        <ChannelSwitch value={channel} onChange={setChannel} />
-        <TextInput
-          placeholder="タイトル・タグで検索"
-          placeholderTextColor={colors.inkSoft}
-          value={query}
-          onChangeText={setQuery}
-          style={styles.search}
-        />
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <PaperCard paper={item} onPress={() => onSelectPaper(item)} />
-          )}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>該当する論文が見つかりません。</Text>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.title}>Seitone</Text>
+              <Text style={styles.subtitle}>翻訳・要約・整理のダッシュボード</Text>
             </View>
-          }
-        />
+            <PrimaryButton label="＋追加" onPress={onCreatePaper} />
+          </View>
+          <ChannelSwitch
+            value={channel}
+            onChange={handleChannelChange}
+            scrollX={scrollX}
+            pageWidth={pageWidth}
+          />
+          <TextInput
+            placeholder="タイトル・タグで検索"
+            placeholderTextColor={colors.placeholder}
+            value={query}
+            onChangeText={setQuery}
+            style={styles.search}
+          />
+        </View>
+        <View style={styles.pager} onLayout={handlePagerLayout}>
+          <Animated.ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handlePagerScrollEnd}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+          >
+            <View style={[styles.page, { width: pageWidth }]}>
+              <FlatList
+                data={filteredJa}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <PaperCard paper={item} onPress={() => onSelectPaper(item)} />
+                )}
+                contentContainerStyle={[styles.list, styles.listContent]}
+                ListEmptyComponent={
+                  <View style={styles.empty}>
+                    <Text style={styles.emptyText}>
+                      該当する論文が見つかりません。
+                    </Text>
+                  </View>
+                }
+              />
+            </View>
+            <View style={[styles.page, { width: pageWidth }]}>
+              <FlatList
+                data={filteredEn}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <PaperCard paper={item} onPress={() => onSelectPaper(item)} />
+                )}
+                contentContainerStyle={[styles.list, styles.listContent]}
+                ListEmptyComponent={
+                  <View style={styles.empty}>
+                    <Text style={styles.emptyText}>
+                      該当する論文が見つかりません。
+                    </Text>
+                  </View>
+                }
+              />
+            </View>
+          </Animated.ScrollView>
+        </View>
       </SafeAreaView>
     </AtmosphericBackground>
   );
@@ -75,7 +156,10 @@ export function LibraryScreen({ papers, onSelectPaper, onCreatePaper }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.lg,
+  },
+  content: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
   header: {
     flexDirection: 'row',
@@ -104,8 +188,17 @@ const styles = StyleSheet.create({
     fontFamily: typography.body,
     color: colors.ink,
   },
+  pager: {
+    flex: 1,
+  },
+  page: {
+    flex: 1,
+  },
   list: {
     paddingBottom: spacing.xl,
+  },
+  listContent: {
+    paddingHorizontal: spacing.lg,
   },
   empty: {
     padding: spacing.lg,

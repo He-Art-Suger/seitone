@@ -3,6 +3,7 @@ export const colors = {
   inkSoft: '#2C3340',
   mist: '#F4F1EB',
   clay: '#E6DFD4',
+  clayDeep: '#DDD2C4',
   blush: '#F1C7B6',
   sage: '#C9D7C1',
   ocean: '#3D6B6F',
@@ -17,4 +18,5 @@ export const colors = {
   warning: '#E3A73F',
   danger: '#D15D4E',
   border: '#E1D7C9',
+  placeholder: '#9AA1A9',
 };

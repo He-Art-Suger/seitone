@@ -1,14 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 
 type Props = {
-  label: string;
+  label: React.ReactNode;
   onPress: () => void;
   variant?: 'primary' | 'ghost' | 'dark';
   style?: ViewStyle;
+  labelStyle?: TextStyle;
 };
 
 export function PrimaryButton({
@@ -16,15 +17,21 @@ export function PrimaryButton({
   onPress,
   variant = 'primary',
   style,
+  labelStyle,
 }: Props) {
+  const isPrimitive = typeof label === 'string' || typeof label === 'number';
   return (
     <TouchableOpacity
       style={[styles.base, styles[variant], style]}
       onPress={onPress}
     >
-      <Text style={[styles.text, variant === 'dark' && styles.textDark]}>
-        {label}
-      </Text>
+      {isPrimitive ? (
+        <Text style={[styles.text, variant === 'dark' && styles.textDark, labelStyle]}>
+          {label}
+        </Text>
+      ) : (
+        label
+      )}
     </TouchableOpacity>
   );
 }
