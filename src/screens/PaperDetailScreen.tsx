@@ -8,7 +8,7 @@ import { Paper } from '../types';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
-import { mockSummarize, mockTranslateToJapanese } from '../utils/aiMocks';
+import { mockTranslateToJapanese } from '../utils/aiMocks';
 
 type Props = {
   paper: Paper;
@@ -26,27 +26,6 @@ export function PaperDetailScreen({ paper, onEdit, onUpdate }: Props) {
   const handleTranslate = () => {
     const translated = mockTranslateToJapanese(current.abstract);
     const next = { ...current, translatedAbstract: translated };
-    setCurrent(next);
-    onUpdate(next);
-  };
-
-  const handleSummarize = () => {
-    const summary = mockSummarize(
-      [current.abstract, ...current.sections.map((section) => section.content)].join(
-        ' '
-      )
-    );
-    const next = { ...current, overallSummary: summary };
-    setCurrent(next);
-    onUpdate(next);
-  };
-
-  const handleSummarizeSections = () => {
-    const nextSections = current.sections.map((section) => ({
-      ...section,
-      summary: section.summary ?? mockSummarize(section.content),
-    }));
-    const next = { ...current, sections: nextSections };
     setCurrent(next);
     onUpdate(next);
   };
@@ -94,26 +73,7 @@ export function PaperDetailScreen({ paper, onEdit, onUpdate }: Props) {
 
           <View style={styles.sectionBlock}>
             <View style={styles.rowBetween}>
-              <Text style={styles.sectionTitle}>全体要約</Text>
-              <PrimaryButton
-                label="自動要約"
-                onPress={handleSummarize}
-                variant="ghost"
-              />
-            </View>
-            <Text style={styles.sectionText}>
-              {current.overallSummary ?? 'まだ要約がありません。'}
-            </Text>
-          </View>
-
-          <View style={styles.sectionBlock}>
-            <View style={styles.rowBetween}>
               <Text style={styles.sectionTitle}>章ごとの要約</Text>
-              <PrimaryButton
-                label="一括要約"
-                onPress={handleSummarizeSections}
-                variant="ghost"
-              />
             </View>
             {current.sections.map((section) => (
               <SectionSummaryCard

@@ -20,6 +20,7 @@ type Props = {
   labelStyle?: TextStyle;
   placeholderTextColor?: string;
   persistentPlaceholder?: boolean;
+  borderless?: boolean;
 };
 
 export function FieldInput({
@@ -32,6 +33,7 @@ export function FieldInput({
   labelStyle,
   placeholderTextColor,
   persistentPlaceholder = false,
+  borderless = false,
 }: Props) {
   const [focused, setFocused] = useState(false);
   const showPersistentPlaceholder =
@@ -59,6 +61,7 @@ export function FieldInput({
           style={[
             styles.input,
             persistentPlaceholder && styles.inputPersistent,
+            borderless && styles.inputBorderless,
             multiline && styles.inputMultiline,
           ]}
           placeholder={persistentPlaceholder ? undefined : placeholder}
@@ -95,6 +98,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     fontFamily: typography.body,
     color: colors.ink,
+  },
+  inputBorderless: {
+    borderWidth: 0,
+    borderColor: 'transparent',
   },
   inputPersistent: {
     backgroundColor: 'transparent',
